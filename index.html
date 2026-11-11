@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>чим Таблицу</title>
+<link rel="manifest" href="manifest.json">
+<style>
+  html, body { margin:0; padding:0; height:100%; overflow:hidden; background:#2c3e50; font-family:sans-serif; user-select:none; touch-action:manipulation; }
+  #app { display:flex; flex-direction:column; height:100dvh; width:100vw; max-width:500px; margin:0 auto; background:#f4f7f6; }
+  
+  .header { padding:10px; background:#4CAF50; color:white; text-align:center; font-size:16px; font-weight:bold; flex-shrink:0; }
+  .content { flex-grow:1; display:flex; flex-direction:column; justify-content:center; align-items:center; padding:10px; text-align:center; overflow:hidden; }
+  
+  /* чеба */
+  .learn-card { background:white; border-radius:15px; padding:20px; box-shadow:0 4px 10px rgba(0,0,0,0.1); width:90%; max-width:350px; }
+  .learn-equation { font-size: 11vh; font-weight:bold; color:#2c3e50; margin-bottom:10px; line-height:1; }
+  .learn-assoc { font-size: clamp(16px, 3.5vh, 24px); color:#555; font-style:italic; background:#e8f5e9; padding:15px; border-radius:10px; line-height:1.3; }
+  
+  /* Тест */
+  .test-card { display:none; background:white; border-radius:15px; padding:10px; box-shadow:0 4px 10px rgba(0,0,0,0.1); width:95%; max-width:380px; }
+  .test-equation { font-size:9vh; font-weight:bold; color:#2c3e50; }
+  .test-answer { font-size:9vh; color:#e74c3c; border-bottom:4px solid #4CAF50; height:11vh; margin:0 auto 10px auto; width:60%; }
+  .joke-box { display:none; font-size: clamp(14px, 3vh, 20px); color:#333; margin-top:10px; background:#fff3e0; padding:10px; border-radius:10px; line-height:1.2; }
+  
+  /* лавиатура */
+  .numpad { display:none; grid-template-columns: repeat(3, 1fr); gap:5px; width:95%; max-width:350px; margin-top:5px; }
+  .numpad button { font-size:4.5vh; padding:1.5vh 0; border:none; border-radius:10px; background:#fff; box-shadow:0 2px 4px rgba(0,0,0,0.2); color:#333; }
+  .numpad button:active { background:#ddd; }
+  .btn-del { background:#ffcdd2 !important; }
+  .btn-check { grid-column: span 3; background:#2196F3 !important; color:white !important; font-weight:bold; }
+  
+  .action-btn { width:90%; max-width:350px; padding:12px; font-size: clamp(16px, 3.5vh, 22px); background:#4CAF50; color:white; border:none; border-radius:50px; font-weight:bold; box-shadow:0 4px 6px rgba(0,0,0,0.2); margin-top:15px; }
+  .action-btn:active { background:#388E3C; }
+  
+  .progress-bar { width:90%; height:8px; background:#e0e0e0; border-radius:5px; margin-top:15px; overflow:hidden; margin-left:auto; margin-right:auto; }
+  .progress-fill { height:100%; background:#4CAF50; width:0%; transition:width 0.3s; }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="header" id="headerTitle">рок: Таблица на 2</div>
+  
+  <div class="content">
+    <!--  Ы -->
+    <div id="learnSection" class="learn-card">
+      <div id="learnEq" class="learn-equation">2 × 2 = 4</div>
+      <div id="learnAssoc" class="learn-assoc"></div>
+      <div class="progress-bar"><div id="learnProgress" class="progress-fill"></div></div>
+      <button class="action-btn" onclick="nextLearnCard()">онятно, далее ➔</button>
+    </div>
+
+    <!--  ТСТ -->
+    <div id="testSection" class="test-card">
+      <div id="testEq" class="test-equation">2 × 2</div>
+      <div id="testAnswer" class="test-answer">?</div>
+      <div id="jokeBox" class="joke-box"></div>
+      
+      <div id="numpad" class="numpad">
+        <button onclick="press(1)">1</button><button onclick="press(2)">2</button><button onclick="press(3)">3</button>
+        <button onclick="press(4)">4</button><button onclick="press(5)">5</button><button onclick="press(6)">6</button>
+        <button onclick="press(7)">7</button><button onclick="press(8)">8</button><button onclick="press(9)">9</button>
+        <button onclick="press(0)">0</button><button class="btn-del" onclick="clearAnswer()">C</button>
+        <button class="btn-check" onclick="checkAnswer()">ТЬ</button>
+      </div>
+      <button id="nextBtn" class="action-btn" style="display:none; margin:10px auto;" onclick="startNextTest()">Следующий вопрос ➔</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ТЬ СС Т !
+const data = {
+  2: [
+    {q: "2x2", a: 4, text: "важды два — четыре. (то знают все!)"},
+    {q: "2x3", a: 6, text: "ебедь (2) с усами (3) — получается цифра 6."},
+    {q: "2x4", a: 8, text: "ебедь (2) сел на стул (4) — стал снеговиком (8)."},
+    {q: "2x5", a: 10, text: "ебедь (2) и звезда (5) — 10 пальцев на двух руках."},
+    {q: "2x6", a: 12, text: "ебедь (2) и замок (6) — в году 12 месяцев."},
+    {q: "2x7", a: 14, text: "ебедь (2) и коса (7) — в двух неделях 14 дней."},
+    {q: "2x8", a: 16, text: "ебедь (2) и снеговик (8) — в 16 лет дают паспорт."},
+    {q: "2x9", a: 18, text: "ебедь (2) и шарик (9) — в 18 лет наступает совершеннолетие."}
+  ],
+  3: [
+    {q: "3x3", a: 9, text: "сы (3) и усы (3) — 9 (три раза по три)."},
+    {q: "3x4", a: 12, text: "сы (3) и стул (4) — помните фильм '12 стульев'?"},
+    {q: "3x5", a: 15, text: "сы (3) и звезда (5) — 15 минут на часах (четверть)."},
+    {q: "3x6", a: 18, text: "сы (3) и замок (6) — 18 лет (совершеннолетие)."},
+    {q: "3x7", a: 21, text: "сы (3) и коса (7) — 21 очко (выигрыш в 'очко')."},
+    {q: "3x8", a: 24, text: "сы (3) и снеговик (8) — в сутках 24 часа."},
+    {q: "3x9", a: 27, text: "сы (3) и шарик (9) — в русском алфавите 27 букв (с )."}
+  ]
+};
+
+const jokes = [
+  "атематик спрашивает: 'очему вы опоздали?' — 'звините, я шел по координатной прямой, а там пробка!'",
+  "читель: 'Сколько будет 7х8?' ченик: '52'. читель: 'у ладно, 56, но идея была хорошая!'",
+  "то сказала таблица умножения таблице сложения? 'ы с тобой умножаемся, а не складываемся!'",
+  "атематика — это единственное место, где люди покупают 60 арбузов и никто не спрашивает зачем.",
+  "Я не боюсь математики. Я боюсь букв в математике (алгебры)."
+];
+
+let currentLevel = 2;
+let learnIndex = 0;
+let currentTest = null;
+let currentInput = "";
+
+window.onload = () => { startLearnPhase(); };
+
+function startLearnPhase() {
+  document.getElementById('headerTitle').innerText = `рок: Таблица на ${currentLevel}`;
+  document.getElementById('learnSection').style.display = 'block';
+  document.getElementById('testSection').style.display = 'none';
+  learnIndex = 0;
+  showLearnCard();
+}
+
+function showLearnCard() {
+  const levelData = data[currentLevel];
+  if (learnIndex >= levelData.length) {
+    startTestPhase();
+    return;
+  }
+  const item = levelData[learnIndex];
+  document.getElementById('learnEq').innerText = item.q.replace('x', ' × ') + " = " + item.a;
+  document.getElementById('learnAssoc').innerText = item.text;
+  
+  let percent = (learnIndex / levelData.length) * 100;
+  document.getElementById('learnProgress').style.width = percent + "%";
+}
+
+function nextLearnCard() {
+  learnIndex++;
+  showLearnCard();
+}
+
+function startTestPhase() {
+  document.getElementById('learnSection').style.display = 'none';
+  document.getElementById('testSection').style.display = 'block';
+  document.getElementById('headerTitle').innerText = `роверка: Таблица на ${currentLevel}`;
+  document.getElementById('numpad').style.display = 'grid';
+  startNextTest();
+}
+
+function startNextTest() {
+  const levelData = data[currentLevel];
+  currentTest = levelData[Math.floor(Math.random() * levelData.length)];
+  
+  document.getElementById('testEq').innerText = currentTest.q.replace('x', ' × ');
+  document.getElementById('testAnswer').innerText = "?";
+  document.getElementById('jokeBox').style.display = 'none';
+  document.getElementById('numpad').style.display = 'grid';
+  document.getElementById('nextBtn').style.display = 'none';
+  currentInput = "";
+}
+
+function press(num) {
+  if (currentInput.length < 2) {
+    currentInput += num.toString();
+    document.getElementById('testAnswer').innerText = currentInput;
+  }
+}
+
+function clearAnswer() {
+  currentInput = "";
+  document.getElementById('testAnswer').innerText = "?";
+}
+
+function checkAnswer() {
+  if (currentInput === "") return;
+  const userAnswer = parseInt(currentInput);
+  const jokeBox = document.getElementById('jokeBox');
+  jokeBox.style.display = 'block';
+  
+  if (userAnswer === currentTest.a) {
+    jokeBox.innerText = "ерно! ✅\n\n" + jokes[Math.floor(Math.random() * jokes.length)];
+    jokeBox.style.background = "#e8f5e9";
+    jokeBox.style.color = "#2e7d32";
+  } else {
+    jokeBox.innerText = "шибка! ❌ равильно: " + currentTest.a + "\n\nспомни: " + currentTest.text;
+    jokeBox.style.background = "#ffebee";
+    jokeBox.style.color = "#c62828";
+  }
+  
+  document.getElementById('numpad').style.display = 'none';
+  document.getElementById('nextBtn').style.display = 'block';
+}
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js');
+}
+</script>
+</body>
+</html>
